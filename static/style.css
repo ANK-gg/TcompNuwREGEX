@@ -1,0 +1,18 @@
+:root{--ink:#1b2a3a;--mut:#64748b;--line:#d5dbe3;--acc:#0f766e;--bg:#f7f9fb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:980px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:1.9rem;margin:0 0 6px}h2{font-size:1.25rem;margin:0 0 10px}h3{font-size:1.05rem;margin:22px 0 8px}h4{margin:14px 0 6px}
+.lead{max-width:75ch;color:var(--mut)}
+section{background:#fff;border:1px solid var(--line);border-radius:8px;padding:18px 20px;margin-top:18px}
+section.err{border-color:#c2410c;background:#fff7f2}
+label{display:block;margin:12px 0 4px;font-weight:600}
+textarea{width:100%;font:14px/1.5 Consolas,monospace;padding:10px;border:1px solid var(--line);border-radius:6px}
+button{margin-top:14px;background:var(--acc);color:#fff;border:0;border-radius:6px;padding:9px 18px;font-size:1rem;cursor:pointer}
+button:hover{filter:brightness(1.1)}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #5eead4;outline-offset:2px}
+pre{background:#eef2f6;padding:12px;border-radius:6px;overflow-x:auto;font-size:13px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left}th{background:#eef2f6}
+.s{width:auto}.card{border:1px solid var(--line);border-radius:6px;padding:12px 14px;margin-top:12px}
+.sv{overflow-x:auto}.q{font-size:13px;color:var(--mut);margin:8px 0 2px}.muted{color:var(--mut)}
+.badge{font-size:.8rem;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid}.badge.ok{color:#0f766e;border-color:#0f766e}.badge.no{color:#c2410c;border-color:#c2410c}

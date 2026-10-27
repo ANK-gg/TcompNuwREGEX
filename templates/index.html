@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compilador de registro de placas</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body><main>
+<h1>Compilador de registro de placas</h1>
+<p class="lead">{{ enunciado }}</p>
+
+<section><h2>A) Caso</h2>
+<form method="POST" enctype="multipart/form-data">
+<label for="texto">Escribe las instrucciones (una por línea)</label>
+<textarea id="texto" name="texto" rows="6">{{ texto }}</textarea>
+<label for="archivo">O carga un archivo .txt (tiene prioridad sobre el cuadro)</label>
+<input type="file" id="archivo" name="archivo" accept=".txt">
+<button type="submit">Analizar y traducir</button></form></section>
+
+{% if res %}
+{% if res.errs %}<section class="err"><h2>Errores</h2><ul>{% for e in res.errs %}<li>{{ e }}</li>{% endfor %}</ul></section>{% endif %}
+<section><h2>B) Resultado</h2>
+{% if res.sql %}<h3>SQL</h3><pre>{{ res.sql }}</pre><h3>JSON</h3><pre>{{ res.json }}</pre>
+<form method="POST" action="{{ url_for('reporte') }}"><input type="hidden" name="texto" value="{{ texto }}"><button type="submit">Descargar reporte PDF</button></form>
+{% else %}<p class="muted">No hay traducción: corrige los errores indicados.</p>{% endif %}</section>
+{% endif %}
+
+<section><h2>C) Proceso interno</h2>
+<h3>3.1 Análisis léxico</h3>
+{% if res and res.toks %}<table><tr><th>Línea</th><th>Lexema</th><th>Token</th></tr>{% for t,l,n in res.toks %}<tr><td>{{ n }}</td><td><code>{{ l }}</code></td><td>{{ t }}</td></tr>{% endfor %}</table>
+{% else %}<p class="muted">Los tokens aparecerán al analizar una entrada.</p>{% endif %}
+{% if res and res.placas %}<h4>Recorrido de cada placa en el AFD de PLACA</h4>
+{% for p in res.placas %}<div class="card"><h4><code>{{ p.lex }}</code> <span class="badge {{ 'ok' if p.ok else 'no' }}">{{ 'Aceptada' if p.ok else 'Rechazada' }}</span></h4>
+<p class="q">Línea {{ p.lineas }}: {{ p.motivo }}. El camino recorrido está resaltado.</p><div class="sv">{{ p.svg|safe }}</div>
+<table class="s"><tr><th>Estado actual</th><th>Carácter leído</th><th>Clase</th><th>Estado siguiente</th></tr>{% for a,c,s,b in p.pasos %}<tr><td>{{ a }}</td><td><code>{{ c }}</code></td><td><code>{{ s }}</code></td><td>{{ b }}</td></tr>{% endfor %}</table></div>{% endfor %}{% endif %}
+<h4>Autómatas de cada token</h4>
+{% for a in atomos %}<div class="card"><h4>{{ a.nombre }}: <code>{{ a.er }}</code></h4>
+<p class="q"><b>AFND</b> {{ a.qn }}</p><div class="sv">{{ a.sn|safe }}</div>
+<p class="q"><b>AFD</b> {{ a.qd }}</p><div class="sv">{{ a.sd|safe }}</div>
+<table class="s"><tr><th>Estado (AFD)</th><th>Símbolo</th><th>Destino</th></tr>{% for x,s,y in a.td %}<tr><td>{{ x }}</td><td><code>{{ s }}</code></td><td>{{ y }}</td></tr>{% endfor %}</table></div>{% endfor %}
+
+<h3>3.2 Análisis sintáctico (LR)</h3>
+<p>G = (V, T, P, S) con V = {S', L, I}, T = {TI, TS, P, H}, S = S'. TI = TOK_INGRESO, TS = TOK_SALIDA, P = PLACA, H = HORA.</p>
+<pre>{% for l,r in reglas %}{{ loop.index0 }}: {{ l }} → {{ r|join(' ') }}
+{% endfor %}</pre>
+<table class="s"><tr><th rowspan="2">Estado</th><th colspan="5">ACCIÓN</th><th colspan="2">IR A</th></tr><tr><th>TI</th><th>TS</th><th>P</th><th>H</th><th>$</th><th>L</th><th>I</th></tr>
+{% for f in tabla_lr %}<tr>{% for c in f %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</table>
+{% if res and res.trace %}<h4>Traza del análisis</h4><table class="s"><tr><th>Pila</th><th>Entrada</th><th>Acción</th></tr>{% for p,r,a in res.trace %}<tr><td>{{ p }}</td><td>{{ r }}</td><td>{{ a }}</td></tr>{% endfor %}</table>
+<h4>Árbol sintáctico</h4><div class="sv">{{ res.tree|safe }}</div>{% endif %}
+
+<h3>3.3 Análisis semántico</h3>
+{% if res and res.rows %}<table><tr><th>Nodo</th><th>Atributo</th><th>Acción semántica</th></tr>{% for a,b,c in res.rows %}<tr><td>{{ a }}</td><td>{{ b }}</td><td>{{ c }}</td></tr>{% endfor %}</table>
+{% else %}<p class="muted">Se completa cuando el análisis sintáctico es correcto.</p>{% endif %}
+</section></main></body></html>
